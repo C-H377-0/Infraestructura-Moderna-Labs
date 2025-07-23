@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'LabDashboards'
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 5
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

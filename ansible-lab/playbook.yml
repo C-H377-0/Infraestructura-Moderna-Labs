@@ -1,0 +1,42 @@
+---
+- name: Instalar Docker en servidores AlmaLinux
+  hosts: servers
+  become: true
+  tasks:
+
+    - name: Instalar paquetes necesarios para repositorios
+      dnf:
+        name:
+          - dnf-plugins-core
+          - yum-utils
+        state: present
+
+    - name: Agregar repositorio de Docker
+      command: >
+        dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Instalar Docker Engine y sus componentes
+      dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+        allowerasing: yes
+
+    - name: Habilitar y arrancar el servicio Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+        
+- name: Despliegue completo del laboratorio observabilidad
+  hosts: servers
+  become: true
+  vars:
+    remote_project_path: /root/infra-lab-docker
+  roles:
+    - infra_deploy        
+

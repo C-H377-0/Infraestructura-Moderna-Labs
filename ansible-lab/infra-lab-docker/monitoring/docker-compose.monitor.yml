@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - labnet
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - labnet
+
+  nodeexporter:
+    image: prom/node-exporter
+    container_name: nodeexporter
+    ports:
+      - "9100:9100"
+    networks:
+      - labnet
+
+  loki:
+    image: grafana/loki:2.9.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/loki-config.yml
+      - loki-data:/var/loki
+      - ./loki/entrypoint_loki.sh:/usr/local/bin/entrypoint_loki.sh
+    entrypoint: /usr/local/bin/entrypoint_loki.sh
+    command: []
+    user: root
+    networks:
+      - labnet
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/promtail-config.yml
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/promtail-config.yml
+    networks:
+      - labnet
+
+  tempo:
+    image: grafana/tempo:2.8.1
+    volumes:
+      - ./tempo-config.yml:/etc/tempo.yaml
+      - tempo-data:/var/tempo
+    command:
+      - "--config.file=/etc/tempo.yaml"
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - labnet
+  
+  alertmanager:
+    image: prom/alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - labnet
+
+volumes:
+  grafana-data:
+  loki-data:
+  tempo-data:
+
+networks:
+  labnet:
+    external: true
+
