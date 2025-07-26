@@ -1,0 +1,14 @@
+groups:
+  - name: AlertasWebApp
+    rules:
+      - alert: MuchosErroresInsert
+        expr: |
+          sum(increase(flask_http_request_total{status="500", method="POST"}[1m])) >= 50
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Muchos errores 500 en /insertar"
+          description: "Se detectaron 50 o más errores HTTP 500 en el ultimo minutos"
+
+

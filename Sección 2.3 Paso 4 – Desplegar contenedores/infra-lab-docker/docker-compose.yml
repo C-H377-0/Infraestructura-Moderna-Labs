@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  apache:
+    build: ./apache
+    ports:
+      - "8080:80"
+    networks:
+      - labnet
+    depends_on:
+      - postgres
+  python_app:
+    build: ./python_app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    networks:
+      - labnet
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: labuser
+      POSTGRES_PASSWORD: labpass
+      POSTGRES_DB: labdb
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - labnet
+networks:
+  labnet:
+    driver: bridge
+

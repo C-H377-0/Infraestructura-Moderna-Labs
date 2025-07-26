@@ -1,0 +1,39 @@
+global:
+  # Opcional: Configura un remitente de correo electrónico global si también usas emails
+  # smtp_smarthost: 'smtp.example.org:587'
+  # smtp_from: 'alertmanager@example.org'
+  # smtp_auth_username: 'alertmanager'
+  # smtp_auth_password: 'your_smtp_password'
+  # smtp_require_tls: true
+
+route:
+  # Todas las alertas se envían a este receptor por defecto
+  # Puedes añadir más rutas para enviar diferentes alertas a diferentes receptores
+  receiver: 'telegram-receiver'
+
+  # Si tienes múltiples alertas, puedes agruparlas
+  group_by: ['alertname', 'severity']
+  group_wait: 30s # Espera 30 segundos antes de enviar la primera notificación para un nuevo grupo
+  group_interval: 5m # Espera 5 minutos entre notificaciones para el mismo grupo
+  repeat_interval: 4h # Repite la notificación cada 4 horas si la alerta persiste
+
+receivers:
+  - name: 'telegram-receiver' # Nombre del receptor de Telegram
+    telegram_configs:
+      - bot_token: '7461250940:AAG1jDjd-xn4WGUdCbZuxz39PsnksXOEZs8' # <--- ¡REEMPLAZA CON TU TOKEN DE BOT REAL!
+        chat_id: -4547879388 # <--- ¡REEMPLAZA CON TU CHAT ID REAL!
+        # Puedes elegir el modo de parseo del mensaje (MarkdownV2, HTML, o sin formato)
+        parse_mode: 'HTML' # Usamos HTML para un formato más rico
+        # Plantilla personalizada para el mensaje de Telegram
+        message: |
+          <b>🚨 Alerta de Prometheus 🚨</b>
+          <b>Estado:</b> {{ .Status | toUpper }}
+          <b>Alerta:</b> {{ .CommonLabels.alertname }}
+          <b>Severidad:</b> {{ .CommonLabels.severity | toUpper }}
+          <b>Descripción:</b> {{ .CommonAnnotations.description }}
+          <b>Resumen:</b> {{ .CommonAnnotations.summary }}
+          <b>Instancia:</b> {{ .CommonLabels.instance }}
+          <a href="{{ .ExternalURL }}/#/alerts?search={{ .CommonLabels.alertname }}">Ver en Prometheus</a>
+        send_resolved: true # Envía una notificación cuando la alerta se resuelve
+
+

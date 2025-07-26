@@ -1,0 +1,30 @@
+auth_enabled: false
+server:
+  http_listen_port: 3100
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /tmp/loki-data # Un directorio temporal para archivos de Loki
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory # Para un setup simple, usa inmemory para el ring
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /var/loki/index # Directorio para índices activos
+    cache_location: /var/loki/cache # Directorio para la caché
+    cache_ttl: 24h # TTL de la caché, por ejemplo, 24 horas
+  filesystem:
+    directory: /var/loki/chunks # Directorio para los chunks de datos de logs
+
+schema_config:
+  configs:
+    - from: 2020-10-27 # Fecha desde la que este esquema es válido
+      store: boltdb-shipper # Tipo de almacenamiento para el índice
+      object_store: filesystem # Tipo de almacenamiento para los chunks
+      schema: v11 # Versión del esquema
+      index:
+        prefix: index_ # Prefijo para los archivos de índice
+        period: 24h # Período del índice (24 horas)
+
